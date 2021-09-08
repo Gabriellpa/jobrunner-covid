@@ -1,0 +1,20 @@
+org:
+  jobrunr:
+    job-scheduler:
+      enabled: true
+    background-job-server:
+      enabled: true
+    dashboard:
+      enabled: false
+
+api:
+  cases:
+    url: http://localhost:8081
+
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: FULL
+server:
+  port: 0

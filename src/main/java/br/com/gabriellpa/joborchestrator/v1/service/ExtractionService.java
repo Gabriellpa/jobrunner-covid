@@ -1,37 +1,41 @@
 package br.com.gabriellpa.joborchestrator.v1.service;
 
-import java.util.List;
-
-
-import org.springframework.beans.factory.annotation.Autowired;
+import br.com.gabriellpa.joborchestrator.v1.client.CasesApiClient;
+import org.jobrunr.jobs.annotations.Job;
+import org.jobrunr.scheduling.JobScheduler;
+import org.jobrunr.scheduling.cron.Cron;
 import org.springframework.stereotype.Service;
 
-import br.com.gabriellpa.joborchestrator.v1.client.CoronaVirusGitHubCSSEGIClient;
-import br.com.gabriellpa.joborchestrator.v1.converter.CsvConverter;
-import br.com.gabriellpa.joborchestrator.v1.converter.RawConverter;
-import br.com.gabriellpa.joborchestrator.v1.entity.RawEntity;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.UUID;
+
+// TODO: Deixar chamadas para outras apis agnostica (custom headers, payload e outros parametros)
 
 @Service
 @Slf4j
 public class ExtractionService {
 
-    @Autowired
-    private CoronaVirusGitHubCSSEGIClient client;
-    @Autowired
-    private CsvConverter csvConverter;
-    @Autowired
-    private RawConverter rawConverter;
+    private final CasesApiClient client;
+    private final JobScheduler jobScheduler;
 
-    // TODO: Adicionar como backgroundjob com o JonbRunr
-    public List<RawEntity> getRaws() {
-        try {
-            return rawConverter.toRawEntity(csvConverter.stringToObject(client.getConfirmed()));
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            throw new RuntimeException(e);
-        }
-
+    public ExtractionService(CasesApiClient client, JobScheduler jobScheduler ) {
+        this.client = client;
+        this.jobScheduler = jobScheduler;
     }
-    
+
+    @Job(name = "DEATHS")
+    public void extractDeaceaseData() {
+        jobScheduler.scheduleRecurrently(UUID.randomUUID().toString(), Cron.minutely(), () -> client.getData("DEATHS"));
+    }
+
+    @Job(name = "RECOVERED")
+    public void extractRecoveredData() {
+        jobScheduler.scheduleRecurrently(UUID.randomUUID().toString(), Cron.minutely(), () -> client.getData("RECOVERED"));
+    }
+
+    @Job(name = "CONFIRMED")
+    public void extractConfirmedData() {
+        jobScheduler.scheduleRecurrently(UUID.randomUUID().toString(), Cron.minutely(), () -> client.getData("CONFIRMED"));
+    }
 }
