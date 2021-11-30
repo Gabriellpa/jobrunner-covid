@@ -2,6 +2,7 @@ plugins {
 	id 'org.springframework.boot' version '2.5.4'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
+	id 'com.google.protobuf' version "0.8.14"
 }
 
 group = 'br.com.gabriellpa'
@@ -16,7 +17,7 @@ configurations {
 
 ext{
 	set("springCloudVersion","2020.0.3")
-	set("jobrunrVesion", "3.2.1")
+	set("jobrunrVesion", "4.0.3")
 
 }
 
@@ -36,6 +37,34 @@ dependencies {
     implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
 	implementation "org.jobrunr:jobrunr-spring-boot-starter:${jobrunrVesion}"
 
+	// GRPC
+	compileOnly 'net.devh:grpc-client-spring-boot-starter:2.12.0.RELEASE'
+	implementation "io.grpc:grpc-protobuf:1.35.0"
+	implementation "io.grpc:grpc-stub:1.35.0"
+	compileOnly 'jakarta.annotation:jakarta.annotation-api:1.3.5'
+	implementation 'net.devh:grpc-client-spring-boot-autoconfigure:2.12.0.RELEASE'
+
+}
+
+
+protobuf {
+	protoc {
+		artifact = "com.google.protobuf:protoc:3.14.0"
+	}
+	generatedFilesBaseDir = "$projectDir/src/grpc"
+	clean {
+		delete generatedFilesBaseDir
+	}
+	plugins {
+		grpc {
+			artifact = "io.grpc:protoc-gen-grpc-java:1.35.0"
+		}
+	}
+	generateProtoTasks {
+		all()*.plugins {
+			grpc {}
+		}
+	}
 }
 
 dependencyManagement {
@@ -46,4 +75,24 @@ dependencyManagement {
 
 test {
 	useJUnitPlatform()
+}
+
+
+
+sourceSets {
+	grpc {
+		java {
+			srcDir 'src/grpc/main/grpc'
+			srcDir 'src/grpc/main/java'
+		}
+	}
+	main {
+		compileClasspath += sourceSets.grpc.output
+		runtimeClasspath += sourceSets.grpc.output
+	}
+}
+
+configurations {
+	grpcImplementation.extendsFrom implementation
+	grpcRuntimeOnly.extendsFrom runtimeOnly
 }
