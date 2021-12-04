@@ -5,6 +5,9 @@ import org.jobrunr.storage.StorageProvider;
 import org.jobrunr.storage.nosql.redis.JedisRedisStorageProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ApplicationEventMulticaster;
+import org.springframework.context.event.SimpleApplicationEventMulticaster;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 
 @Configuration
@@ -15,5 +18,13 @@ public class JobrunrConfiguration {
             JedisRedisStorageProvider storageProvider = new JedisRedisStorageProvider();
             storageProvider.setJobMapper(jobMapper);
             return storageProvider;
+        }
+
+        @Bean(name = "applicationEventMulticaster")
+        public ApplicationEventMulticaster simpleApplicationEventMulticaster() {
+            SimpleApplicationEventMulticaster eventMulticaster = new SimpleApplicationEventMulticaster();
+
+            eventMulticaster.setTaskExecutor(new SimpleAsyncTaskExecutor());
+            return eventMulticaster;
         }
 }
