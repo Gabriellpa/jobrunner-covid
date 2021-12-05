@@ -18,6 +18,9 @@ server:
 grpc:
   client:
     local-grpc-server:
+      # por algum motivo maravilhoso isso não funciona
+      # embora não dei nenhum erro de conexão como acontece quando o ip está errado/não consegue conectar.
+      # precisa por o ipv4 direto --' ex: 'static://192.xxx.x.xx:9090'
       address: 'static://casesapi:9090'
       enableKeepAlive: true
       keepAliveWithoutCalls: true
