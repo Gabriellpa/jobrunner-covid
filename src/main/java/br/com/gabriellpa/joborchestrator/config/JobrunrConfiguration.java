@@ -8,16 +8,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import redis.clients.jedis.JedisPool;
 
 
 @Configuration
 public class JobrunrConfiguration {
 
-        @Bean
-        public StorageProvider storageProvider(JobMapper jobMapper) {
-            JedisRedisStorageProvider storageProvider = new JedisRedisStorageProvider();
-            storageProvider.setJobMapper(jobMapper);
-            return storageProvider;
-        }
+    @Bean
+    public StorageProvider storageProvider(JobMapper jobMapper) {
+        JedisRedisStorageProvider storageProvider = new JedisRedisStorageProvider(new JedisPool("redis", 6379));
+        storageProvider.setJobMapper(jobMapper);
+        return storageProvider;
+    }
 
 }
