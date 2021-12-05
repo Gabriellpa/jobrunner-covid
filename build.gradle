@@ -3,6 +3,7 @@ plugins {
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
 	id 'com.google.protobuf' version "0.8.14"
+	id "com.google.cloud.tools.jib" version "3.1.4"
 }
 
 group = 'br.com.gabriellpa'
@@ -78,7 +79,10 @@ test {
 }
 
 
-
+/**
+ *  Configuração para considerar o diretório GRPC, gerado automaticamente, como source code
+ *  sendo necessário só rodar a task para gerar o código no diretório configurado
+ */
 sourceSets {
 	grpc {
 		java {
@@ -95,4 +99,19 @@ sourceSets {
 configurations {
 	grpcImplementation.extendsFrom implementation
 	grpcRuntimeOnly.extendsFrom runtimeOnly
+}
+
+jib {
+	from {
+		image = "openjdk:11.0.13"
+	}
+	to {
+		image = "gabriellpa/orchestrator-jobs"
+	}
+	container {
+		jvmFlags = ['-Xms512m', '-Xdebug']
+		mainClass = 'br.com.gabriellpa.joborchestrator.JobOrchestratorApplication'
+		args = []
+		ports = ['8080/tcp']
+	}
 }
